@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './styles'  # folder containing your function app & requirements.txt
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'  # root folder
   PYTHON_VERSION: '3.10'
 
 jobs:
@@ -25,21 +25,26 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Debug - list files
+        run: |
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          pwd
+          ls -la
+
       - name: Install dependencies
         shell: bash
         run: |
-          pushd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          popd
 
       - name: Zip artifact for deployment
+        shell: bash
         run: |
-          pushd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           zip -r ../release.zip ./*
-          popd
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
